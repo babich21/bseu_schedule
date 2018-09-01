@@ -19,7 +19,6 @@ from models import add_permalink_and_get_key, create_or_update_student
 import settings
 from utils import mailer, bseu_schedule
 
-urlfetch.set_default_fetch_deadline(30)
 
 def _get_app_version():
     # get app version
@@ -138,13 +137,9 @@ class AjaxProxy(RequestHandler):
     def _fake(self):
         self.head = settings.HEADERS
         self.cookie = Cookie.SimpleCookie()
-        try:
-            result = urlfetch.fetch(url=settings.BSEU_SCHEDULE_URL, method=urlfetch.GET, headers=self.head)
-        except urlfetch.Error:
-            result = None
-            logging.exception('Caught exception fetching url')
-        if not result is None:
-            self.cookie.load(result.headers.get('set-cookie', ''))
+        result = urlfetch.fetch(url=settings.BSEU_SCHEDULE_URL, method=urlfetch.GET,
+                                headers=self.head)
+        self.cookie.load(result.headers.get('set-cookie', ''))
 
     def get(self):
         self._fake()
@@ -152,7 +147,7 @@ class AjaxProxy(RequestHandler):
         for field in self.request.arguments():
             dat[field] = self.request.get(field)
         result = urlfetch.fetch(url=settings.BSEU_SCHEDULE_URL, payload=urllib.urlencode(dat), method=urlfetch.POST,
-                                headers=self._getHeaders(self.cookie))
+                                headers=self._getHeaders(self.cookie), deadline=60)
         self.response.out.write(result.content)
 
     def _makeCookieHeader(self, cookie):
