@@ -19,6 +19,7 @@ from models import add_permalink_and_get_key, create_or_update_student
 import settings
 from utils import mailer, bseu_schedule
 
+urlfetch.set_default_fetch_deadline(30)
 
 def _get_app_version():
     # get app version
