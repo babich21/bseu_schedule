@@ -137,17 +137,25 @@ class AjaxProxy(RequestHandler):
     def _fake(self):
         self.head = settings.HEADERS
         self.cookie = Cookie.SimpleCookie()
-        # result = urlfetch.fetch(url=settings.BSEU_SCHEDULE_URL, method=urlfetch.GET,
-        #                         headers=self.head)
-        # self.cookie.load(result.headers.get('set-cookie', ''))
+        # result = requests.get(settings.BSEU_SCHEDULE_URL, headers=self.head)
+        result = urlfetch.fetch(url=settings.BSEU_SCHEDULE_URL, method=urlfetch.GET,
+                                headers=self.head)
+        self.cookie.load(result.headers.get('set-qcookie', ''))
 
     def get(self):
         self._fake()
         dat = {}
         for field in self.request.arguments():
             dat[field] = self.request.get(field)
+        logging.info("url: %s", settings.BSEU_SCHEDULE_URL)
+        logging.info("payload: %s", dat)
+        logging.info("method: %s", urlfetch.POST)
+        logging.info("headers: %s", self._getHeaders(self.cookie))
+        # result = requests.get(settings.BSEU_SCHEDULE_URL)
+        # result = requests.post(settings.BSEU_SCHEDULE_URL, params=urllib.urlencode(dat),
+        #                        headers=self._getHeaders(self.cookie))
         result = urlfetch.fetch(url=settings.BSEU_SCHEDULE_URL, payload=urllib.urlencode(dat), method=urlfetch.POST,
-                                headers=self._getHeaders(self.cookie), deadline=60)
+                                headers=self._getHeaders(self.cookie))
         self.response.out.write(result.content)
 
     def _makeCookieHeader(self, cookie):
