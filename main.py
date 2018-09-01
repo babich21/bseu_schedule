@@ -141,8 +141,10 @@ class AjaxProxy(RequestHandler):
         try:
             result = urlfetch.fetch(url=settings.BSEU_SCHEDULE_URL, method=urlfetch.GET, headers=self.head)
         except urlfetch.Error:
+            result = None
             logging.exception('Caught exception fetching url')
-        self.cookie.load(result.headers.get('set-cookie', ''))
+        if result is None:
+            self.cookie.load(result.headers.get('set-cookie', ''))
 
     def get(self):
         self._fake()
