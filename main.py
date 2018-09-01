@@ -143,7 +143,7 @@ class AjaxProxy(RequestHandler):
         except urlfetch.Error:
             result = None
             logging.exception('Caught exception fetching url')
-        if result is None:
+        if not result is None:
             self.cookie.load(result.headers.get('set-cookie', ''))
 
     def get(self):
